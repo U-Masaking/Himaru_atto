@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    データベース一覧
+{% endblock %}
+
+{% block main %}
+    <div class="h2">
+        データベース一覧
+    </div>
+    <ul>
+      {% for database in databases %}
+        <li>
+          {{ database.name }}
+            <ul>
+              {% for table in tables %}
+               {% if table.database_id == database.id %}
+                <li>
+                  {{ table.name }}
+                </li>
+               {% endif %}
+              {% endfor %}
+            </ul>
+        </li>
+      {% endfor %}
+    </ul>
+{% endblock %}
