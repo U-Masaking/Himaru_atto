@@ -24,6 +24,8 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+    git
+
 
 # Custom filter
 app.jinja_env.filters["usd"] = usd
