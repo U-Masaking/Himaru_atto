@@ -5,23 +5,123 @@
 {% endblock %}
 
 {% block main %}
-    <div class="h2">
-        データベース一覧
-    </div>
-    <ul>
-      {% for database in databases %}
-        <li>
-          {{ database.name }}
-            <ul>
-              {% for table in tables %}
-               {% if table.database_id == database.id %}
-                <li>
+  <div class="row justify-content-center">
+    <!-- 左側：データベース一覧 -->
+    <div class="col-md-6">
+      <!-- ホーム画面への遷移 -->
+      <a href="/index?table1_id={{ table1_id }}&table2_id={{ table2_id }}&table3_id={{ table3_id }}"><button type="button" class="btn btn-primary">SQL</button></a>
+      <!-- データベース登録画面への遷移 -->
+      <a href="/dbregister?table1_id={{ table1_id }}&table2_id={{ table2_id }}&table3_id={{ table3_id }}"><button type="button" class="btn btn-primary">データベース登録</button></a>
+      <!-- データベース一覧画面（本画面）への遷移（Disabled） -->
+      <button type="button" class="btn btn-secondary" disabled>データベース一覧</button>
+      <hr>
+      <!-- データベース・テーブル一覧 -->
+      <form action="/dblist" methon="post" name="dblist">
+        <ul>
+          {% for database in databases %}
+            <li>
+              {{ database.name }}
+            </li>
+            {% for table in tables %}
+              {% if table.database_id == database.id %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                <label class="form-check-label" for="{{ table.id }}">
                   {{ table.name }}
-                </li>
-               {% endif %}
-              {% endfor %}
-            </ul>
-        </li>
-      {% endfor %}
-    </ul>
+                </label>
+              </div>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </ul>
+        <!-- リセットボタン -->
+        <button type="button" class="btn btn-outline-warning" onclick="dblist_reset()">リセット</button>
+        <!-- 送信ボタン -->
+        <button class="btn btn-primary" type="submit">データベース選択</button>
+      </form>
+    </div>
+    <!-- 右側：現在選択されているテーブル -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="text-right">
+        </div>
+          <!-- テーブル1 -->
+          {% if table1 %}
+            <table>
+              <thead>
+                <tr>
+                  {% for table1_column in table1_columns %}
+                    <th>
+                      {{ table1_column["name"] }}
+                    </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in table1 %}
+                  <tr>
+                    {% for table1_column in table1_columns %}
+                      <td>
+                        {{ row["{{ table1_column["name"] }}"] }}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+          <!-- テーブル2 -->
+          {% if table2 %}
+            <table>
+              <thead>
+                <tr>
+                  {% for table2_column in table2_columns %}
+                    <th>
+                      {{ table2_column["name"] }}
+                    </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in table2 %}
+                  <tr>
+                    {% for table2_column in table2_columns %}
+                      <td>
+                        {{ row["{{ table2_column["name"] }}"] }}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+          <!-- テーブル3 -->
+          {% if table3 %}
+            <table>
+              <thead>
+                <tr>
+                  {% for table3_column in table3_columns %}
+                    <th>
+                      {{ table3_column["name"] }}
+                    </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in table3 %}
+                  <tr>
+                    {% for table3_column in table3_columns %}
+                      <td>
+                        {{ row["{{ table3_column["name"] }}"] }}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
