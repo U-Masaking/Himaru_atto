@@ -1,0 +1,83 @@
+.column {
+	height: 100vh;
+	width: 100%;
+  }
+  .leftside {
+	background: gray;
+	background-size: cover;
+  }
+  .rightside {
+	background: black;
+	background-size: cover;
+  }
+
+  @media all and (min-width: 700px) {
+	.wrapper {
+	  display: flex;
+	}
+  }
+
+  .content2 {
+	  padding:20px;
+  }
+
+  .column2 {
+	  height: 70vh;
+	  width: 100%;
+  }
+
+  .button {
+	  margin: 5%;
+	  margin-top: 5%;
+  }
+
+
+
+
+  /*ベース*/
+section.typeA{
+	display: flex;
+	flex-wrap: wrap;
+}
+section.typeA::after {
+	content: '';
+	width: 100%;
+	height: 3px;
+	order: -1;
+	display: block;
+	background: rgba(0,137,167,.7);
+}
+section.typeA .tabLabel {	/* タブ */
+	margin-right: 3px;
+	padding: 3px 12px;
+	flex: 1;
+	order: -1;
+	border-radius: 3px 3px 0 0;
+	color: #444;
+	background: rgba(0,137,167,.3);
+	transition: .5s ;
+	cursor: pointer;
+}
+section.typeA .tabLabel:nth-last-of-type(1){ margin-right: 0; }
+section.typeA input {		/* ラジオボタン非表示 */
+	display: none;
+}
+section.typeA .content {	/* 本文 */
+	width: 100%;
+	height: 0;
+	overflow: hidden;
+	opacity: 0;
+}
+/*アクティブ設定*/
+section.typeA input:checked + .tabLabel {
+	color: #fff;
+	background: rgba(0,137,167,.7);
+}
+section.typeA input:checked + .tabLabel + .content {
+	padding: 15px;
+	height: auto;
+	overflow: auto;
+	box-shadow: 0 0 5px rgba(0,0,0,.2);
+	transition: .5s opacity;
+	opacity: 1;
+}
