@@ -39,10 +39,3 @@
   animation-name: modalopen;
   animation-duration: 1s;
 }
-
-.close {
-  position: absolute;
-	top: 4px;
-	right: 4px;
-	cursor:pointer;
-}
