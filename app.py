@@ -67,6 +67,7 @@ def dblist():
 
     # getの場合
     else:
+        return render_template("dblist.html")
         # データベースを取得
         if session["user_id"]: # ログイン時
             databases = db.execute("SELECT * FROM databases WHERE user_id = ?", session["user_id"])
