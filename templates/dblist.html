@@ -19,13 +19,23 @@
       <form action="/dblist" methon="post" name="dblist">
         <ul>
           {% for database in databases %}
+            <!-- データベース名 -->
             <li>
-              {{ database.name }}
+              <div class="h3">
+                {{ database.name }}
+              </div>
             </li>
+            <!-- テーブル -->
             {% for table in tables %}
-              {% if table.database_id == database.id %}
+              {% if table.database_id == database.id %} <!-- 該当するデータベースかどうか -->
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                <!-- チェックボックス -->
+                {% if table.id == table1_id or table.id == table2_id or table.id == table3_id %} <!-- すでに選択している時 -->
+                  <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
+                {% else %} <!-- 選択していない時 -->
+                  <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                {% endif %}
+                <!-- テーブル名 -->
                 <label class="form-check-label" for="{{ table.id }}">
                   {{ table.name }}
                 </label>
@@ -62,7 +72,7 @@
                   <tr>
                     {% for table1_column in table1_columns %}
                       <td>
-                        {{ row["{{ table1_column["name"] }}"] }}
+                        {{ row['{{ table1_column["name"] }}'] }}
                       </td>
                     {% endfor %}
                   </tr>
@@ -87,7 +97,7 @@
                   <tr>
                     {% for table2_column in table2_columns %}
                       <td>
-                        {{ row["{{ table2_column["name"] }}"] }}
+                        {{ row['{{ table2_column["name"] }}'] }}
                       </td>
                     {% endfor %}
                   </tr>
@@ -112,7 +122,7 @@
                   <tr>
                     {% for table3_column in table3_columns %}
                       <td>
-                        {{ row["{{ table3_column["name"] }}"] }}
+                        {{ row['{{ table3_column["name"] }}'] }}
                       </td>
                     {% endfor %}
                   </tr>
