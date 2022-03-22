@@ -30,9 +30,25 @@
               {% if table.database_id == database.id %} <!-- 該当するデータベースかどうか -->
               <div class="form-check">
                 <!-- チェックボックス -->
-                {% if table.id == table1_id or table.id == table2_id or table.id == table3_id %} <!-- すでに選択している時 -->
-                  <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
-                {% else %} <!-- 選択していない時 -->
+                {% if table1_id and table2_id and table3_id %}
+                  {% if table.id|int == table1_id|int or table.id|int == table2_id|int or table.id|int == table3_id|int %} <!-- すでに選択している時 -->
+                    <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
+                  {% else %}
+                     <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                  {% endif %}
+                {% elif table1_id and table2_id %} <!-- 選択していない時 -->
+                  {% if table.id|int == table1_id|int or table.id|int == table2_id|int %} <!-- すでに選択している時 -->
+                    <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
+                  {% else %}
+                     <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                  {% endif %}
+                {% elif table1_id %}
+                  {% if table.id|int == table1_id|int %} <!-- すでに選択している時 -->
+                    <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
+                  {% else %}
+                     <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                  {% endif %}
+                {% else %}
                   <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
                 {% endif %}
                 <!-- テーブル名 -->
@@ -53,82 +69,95 @@
     <!-- 右側：現在選択されているテーブル -->
     <div class="col-md-6">
       <div class="card">
-        <div class="text-right">
-        </div>
           <!-- テーブル1 -->
           {% if table1 %}
-            <table>
-              <thead>
-                <tr>
-                  {% for table1_column in table1_columns %}
-                    <th>
-                      {{ table1_column["name"] }}
-                    </th>
-                  {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in table1 %}
+            <div class="card m-3">
+              <div class="h3 text-center">
+                {{ table1_name }}
+              </div>
+              <table class="table table-striped mb-0">
+                <thead>
                   <tr>
                     {% for table1_column in table1_columns %}
-                      <td>
-                        {{ row['{{ table1_column["name"] }}'] }}
-                      </td>
+                      <th>
+                        {{ table1_column["name"] }}
+                      </th>
                     {% endfor %}
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for row in table1 %}
+                    <tr>
+                      {% for table1_column in table1_columns %}
+                        <td>
+                          {{ row[table1_column["name"]] }}
+                        </td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% endif %}
           <!-- テーブル2 -->
           {% if table2 %}
-            <table>
-              <thead>
-                <tr>
-                  {% for table2_column in table2_columns %}
-                    <th>
-                      {{ table2_column["name"] }}
-                    </th>
-                  {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in table2 %}
+            <div class="card m-3">
+              <div class="h3 text-center">
+                {{ table2_name }}
+              </div>
+              <table class="table table-striped mb-0">
+                <thead>
                   <tr>
                     {% for table2_column in table2_columns %}
-                      <td>
-                        {{ row['{{ table2_column["name"] }}'] }}
-                      </td>
+                      <th>
+                        {{ table2_column["name"] }}
+                      </th>
                     {% endfor %}
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for row in table2 %}
+                    <tr>
+                      {% for table2_column in table2_columns %}
+                        <td>
+                          {{ row[table2_column["name"]] }}
+                        </td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% endif %}
           <!-- テーブル3 -->
           {% if table3 %}
-            <table>
-              <thead>
-                <tr>
-                  {% for table3_column in table3_columns %}
-                    <th>
-                      {{ table3_column["name"] }}
-                    </th>
-                  {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in table3 %}
+            <div class="card m-3">
+              <div class="h3 text-center">
+                {{ table3_name }}
+              </div>
+              <table class="table table-striped mb-0">
+                <thead>
                   <tr>
                     {% for table3_column in table3_columns %}
-                      <td>
-                        {{ row['{{ table3_column["name"] }}'] }}
-                      </td>
+                      <th>
+                        {{ table3_column["name"] }}
+                      </th>
                     {% endfor %}
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {% for row in table3 %}
+                    <tr>
+                      {% for table3_column in table3_columns %}
+                        <td>
+                          {{ row[table3_column["name"]] }}
+                        </td>
+                      {% endfor %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% endif %}
       </div>
     </div>

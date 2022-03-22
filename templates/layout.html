@@ -44,38 +44,38 @@
                 SQLコマンド
               </div>
               <hr>
-              <div class="container">
+              <div class="container p-4">
                 <ul>
-                  <li>
+                  <li class="mb-4">
                     <div class="h2">
                       テーブルの作成
                     </div>
                     <div class="card">
-                      CREATE TABLE<span> [テーブル名]</span> (id <span>[属性]</span> PRIMARY KEY, <span>[カラム名]</span> <span>[属性]</span>, ..., FOREIGN KEY <span>[カラム名]</span> REFERENCE <span>[テーブル名]</span> (<span>[部署コード]</span>))
+                      CREATE TABLE <span>[テーブル名]</span> (id <span>[属性]</span> PRIMARY KEY, <span>[カラム名]</span> <span>[属性]</span>, ..., FOREIGN KEY <span>[カラム名]</span> REFERENCE <span>[テーブル名]</span> (<span>[部署コード]</span>))
                     </div>
                   </li>
-                  <li>
+                  <li class="mb-4">
                     <div class="h2">
-                      INSERT
-                    </div>
-                    <div class="h4">
                       テーブルの挿入
                     </div>
-                  </li>
-                  <li>
-                    <div class="h2">
-                      SELECT
+                    <div class="card">
+                      INSERT
                     </div>
-                    <div class="h4">
+                  </li>
+                  <li class="mb-4">
+                    <div class="h2">
                       テーブルの抽出
                     </div>
-                  </li>
-                  <li>
-                    <div class="h2">
-                      DELETE
+                    <div class="card">
+                      SELECT <span>[カラム名]</span>, <span>[カラム名]</span>, ..., FROM <span>[テーブル名]</span> WHERE <span>[カラム名]</span>=? AND ... ORDER BY <span>[カラム名]</span>
                     </div>
-                    <div class="h4">
+                  </li>
+                  <li class="mb-4">
+                    <div class="h2">
                       テーブルの削除
+                    </div>
+                    <div class="card">
+                      DELETE
                     </div>
                   </li>
                 </ul>
@@ -89,8 +89,9 @@
               <div class="h1 text-center">
                 Q&A
               </div>
+              <hr>
               <ul>
-                <li>
+                <li class="mb-4">
                   <div class="h2">
                     問い
                   </div>
