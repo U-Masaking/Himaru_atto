@@ -8,7 +8,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 app = Flask(__name__)
 app.secret_key = "kazuki"
 
-db = "postgresql+psycopg2://postgres:0627@192.168.1.3:5432/mydb"
+db = "postgresql+psycopg2://postgres:....@192.168.1.3:5432/mydb"
 
 # Engineの作成
 engine = sqlalchemy.create_engine(
