@@ -38,46 +38,48 @@
           <li class="nav-item"><a class="nav-link" href="howtouse">使い方</a></li>
           <li class="nav-item"><a class="nav-link" id="sqlist_button">SQLコマンド一覧</a></li>
           <div id="sqlist" class="sqlist">
-            <div class="sqlist_content container">
+            <div class="sqlist_content">
               <span class="close" id="sqlist_close">✖</span>
               <div class="h1 text-center">
                 SQLコマンド
               </div>
               <hr>
-              <ul>
-                <li>
-                  <div class="h2">
-                    テーブルの作成
-                  </div>
-                  <div class="card">
-                    CREATE TABLE <span class="text-muted">[テーブル名]</span> (id [属性] PRIMARY KEY, [カラム名] [属性], ..., FOREIGN KEY [カラム名] REFERENCE [テーブル名] ([部署コード]))
-                  </div>
-                </li>
-                <li>
-                  <div class="h2">
-                    INSERT
-                  </div>
-                  <div class="h4">
-                    テーブルの挿入
-                  </div>
-                </li>
-                <li>
-                  <div class="h2">
-                    SELECT
-                  </div>
-                  <div class="h4">
-                    テーブルの抽出
-                  </div>
-                </li>
-                <li>
-                  <div class="h2">
-                    DELETE
-                  </div>
-                  <div class="h4">
-                    テーブルの削除
-                  </div>
-                </li>
-              </ul>
+              <div class="container">
+                <ul>
+                  <li>
+                    <div class="h2">
+                      テーブルの作成
+                    </div>
+                    <div class="card">
+                      CREATE TABLE <span class="text-muted">[テーブル名]</span> (id <span class="text-muted">[属性]</span> PRIMARY KEY, <span class="text-muted">[カラム名]</span> <span class="text-muted">[属性]</span>, ..., FOREIGN KEY <span class="text-muted">[カラム名]</span> REFERENCE <span class="text-muted">[テーブル名]</span> (<span class="text-muted">[部署コード]</span>))
+                    </div>
+                  </li>
+                  <li>
+                    <div class="h2">
+                      INSERT
+                    </div>
+                    <div class="h4">
+                      テーブルの挿入
+                    </div>
+                  </li>
+                  <li>
+                    <div class="h2">
+                      SELECT
+                    </div>
+                    <div class="h4">
+                      テーブルの抽出
+                    </div>
+                  </li>
+                  <li>
+                    <div class="h2">
+                      DELETE
+                    </div>
+                    <div class="h4">
+                      テーブルの削除
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
           <li class="nav-item"><a class="nav-link" id="question_button">困ったとき</a></li>
