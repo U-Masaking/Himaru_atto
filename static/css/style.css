@@ -47,3 +47,7 @@
 .question_content span {
   color: gray;
 }
+
+.card {
+  display: block;
+}
