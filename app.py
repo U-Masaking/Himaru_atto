@@ -109,10 +109,7 @@ def dblist():
         tables = []
         for database in databases:
             rows = db.session.execute("SELECT * FROM tables WHERE database_id = ?", database["id"])
-            if tables:
-                tables.append(rows)
-            else:
-                tables = rows
+            tables.extend(rows)
 
         # 画面右側に表示するテーブル
         table1_id = request.args.get("table1_id")
