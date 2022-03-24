@@ -123,7 +123,7 @@ def dblist():
             except:
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
-            table1_name = db.execute("SELECT name FROM tables WHERE id = ?", table1_id)[0]["name"]
+            table1_name = db.session.execute("SELECT name FROM tables WHERE id = ?", table1_id)[0]["name"]
             table1_columns = db.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = ?", table1_id)
         else: # テーブルが選択されていない時
             return render_template("dblist.html", databases=databases, tables=tables)
@@ -133,7 +133,7 @@ def dblist():
             except:
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
-            table2_name = db.execute("SELECT name FROM tables WHERE id = ?", table2_id)[0]["name"]
+            table2_name = db.session.execute("SELECT name FROM tables WHERE id = ?", table2_id)[0]["name"]
             table2_columns = db.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = ?", table2_id)
         else: # テーブル1のみが選択されている時
             return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name)
@@ -143,7 +143,7 @@ def dblist():
             except:
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
-            table3_name = db.execute("SELECT name FROM tables WHERE id = ?", table3_id)[0]["name"]
+            table3_name = db.session.execute("SELECT name FROM tables WHERE id = ?", table3_id)[0]["name"]
             table3_columns = db.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = ?", table3_id)
             return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name, table2_id=table2_id, table2=table2, table2_columns=table2_columns, table2_name=table2_name, table3_id=table3_id, table3=table3, table3_columns=table3_columns, table3_name=table3_name)
         else: # テーブル1とテーブル2のみが選択されている時
