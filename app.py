@@ -12,16 +12,13 @@ import psycopg2
 
 
 app = Flask(__name__)
-app.secret_key = "kazuki"
 
-db = "postgresql+psycopg2://postgres:....@192.168.1.3:5432/mydb"
-
-# Engineの作成
-engine = sqlalchemy.create_engine(
-    db,
-    encoding="utf-8",
-    echo=True
-)
+#島崎のローカルのdatabaseに接続
+connection = psycopg2.connect(host="localhost", database="users_test", user="a", password="password", port=5432)
+connection.autocommit = True
+cur = connection.cursor()
+cur.execute("select version()")
+print(connection.get_backend_pid())
 
 # SQLAlchemy の設定
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.py'
@@ -30,50 +27,11 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-session = scoped_session(
-    sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=engine
-    )
-)
-
-# DB とつなぐ
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    __tablename__ = 'users'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    address = db.Column(db.String(100), nullable=False)
-    hash = db.Column(db.String(100), nullable=False)
-
-class Preuser(db.Model):
-    __tablename__ = "preusers"
-
-    session_id = db.Column(db.Integer, primary_key=True)
-
-class Database(db.Model):
-    __tablename__ = 'databases'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer)
-    session_id = db.Column(db.Integer)
-
-class Table(db.Model):
-    __tablename__ = "tables"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    database_id = db.Column(db.Integer, nullable=False)
-
-
 # @app.route("/")
 # # @login_required
 # def index():
 #     return render_template("index.html")
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -87,6 +45,9 @@ def error():
 def login():
     """Log user in"""
 
+    # Forget any user_id
+    session.clear()
+
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
@@ -99,31 +60,30 @@ def login():
             return render_template("error.html")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE name = ?",
-                          request.form.get("name"))
-
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return render_template("error.html")
-
+        cur.execute("SELECT * FROM users WHERE name = %s;",
+                          (request.form.get("name"),))             
+        for i in cur:
+            if len(i) != 4 or not check_password_hash(i[3], request.form.get("password")):
+                print("error hash")
+                # cur.fetchall()                  
+                # cur.close()
+                # connection.close()                  
+                return render_template("error.html")
+            else:
+                # cur.fetchall()                  
+                # cur.close()
+                # connection.close()                  
+                return render_template("index.html")    
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
-                      
-        # Redirect user to home page
-        return redirect("/")
+        # for文使う必要あり
+        # session["user_id"] = rows[0]["id"]
+
+        return render_template("error.html")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
 
-@app.route("/logout")
-def logout():
-    """Log user out"""
-
-    # Forget any user_id
-    session.clear()
-
-    # Redirect user to login form
-    return redirect("/")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -136,10 +96,6 @@ def register():
     # POSTリクエストなら、usernameやpasswordの情報が送られているということ。
     # よってデータベースにusername, address, passwordを追加する
     if request.method == "POST":
-        for i in db.session.execute("SELECT username FROM users"):
-            if request.form.get("username") == i["username"]:
-                return render_template("error.html")
-
         # まずusernameとpasswordが入力されているか確かめる。
         if not request.form.get("name"):
             flash("『ユーザー名』に入力してください","failed")
@@ -160,16 +116,33 @@ def register():
             return render_template("register.html")
 
         else:
-            db.session.execute("SELECT * FROM users")
-            # for i in db:
+            cur.execute("SELECT * FROM users;")
+            # for i in cur:
             #     print(i)
-            db.session.execute("INSERT INTO users (name, address, hash) VALUES (?, ?, ?)",
-                       request.form.get("name"), request.form.get("address"), generate_password_hash(request.form.get("password"), method='sha256'))
+            cur.execute("INSERT INTO users (name, address, hash) VALUES (%s, %s, %s);",
+                       (request.form.get("name"), request.form.get("address"), generate_password_hash(request.form.get("password"), method='sha256')))
 
             flash("登録しました","success")
             return redirect("/login")
-            
-@app.route("/sqlregister", methods=['GET', 'POST'])
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
+
+# @app.route("/sqllist")
+# def sqllist():
+#   databases = Database.query.all()
+#   tables = Table.query.all()
+#   return render_template("sqllist.html", databases=databases, tabales=tables)
+
+
+@app.route("/dbregister", methods=['GET', 'POST'])
 def sqlregister():
   if request.method =="POST":
     name = request.form.get("name")
@@ -186,9 +159,11 @@ def sqlregister():
     # db.session.add(database, table)
     # db.session.commit()
 
-    return redirect("/sqllist")
+    # return redirect(url_for('dblist', table1_id=table_ids[0]))
+    return redirect("/dblist")
+
   else:
-    return render_template("sqlregister.html")
+    return render_template("dbregister.html")
 
 @app.route("/dblist", methods=["GET", "POST"])
 def dblist():
@@ -215,14 +190,14 @@ def dblist():
 
     # getの場合
     else:
-        databases = db.session.execute("SELECT * FROM databases WHERE user_id = ?", "1")
+        databases = cur.execute("SELECT * FROM databases WHERE user_id = %s;", "1")
         print(database)
         # return render_template("dblist.html")
         # データベースを取得
         if session["user_id"]: # ログイン時
-            databases = db.session.execute("SELECT * FROM databases WHERE user_id = ?", session["user_id"])
+            databases = cur.execute("SELECT * FROM databases WHERE user_id = %s;", (session["user_id"]))
         elif session["session_id"]: # 未ログイン時
-            databases = db.session.execute("SELECT * FROM databases WHERE session_id = ?", session["session_id"])
+            databases = cur.execute("SELECT * FROM databases WHERE session_id = %s;", (session["session_id"]))
         else: # エラー時
             flash("エラーが発生しました", "failed")
             return redirect("/")
@@ -235,7 +210,7 @@ def dblist():
         # データベースidと合致するテーブルを取得
         tables = []
         for database in databases:
-            rows = db.session.execute("SELECT * FROM tables WHERE database_id = ?", database["id"])
+            rows = cur.execute("SELECT * FROM tables WHERE database_id = %s;", (database["id"]))
             if tables:
                 tables.append(rows)
             else:
@@ -249,35 +224,42 @@ def dblist():
         # 画面遷移
         if table1_id: # テーブル1が選択されている時
             try:
-                table1 = db.session.execute("SELECT * FROM ?", table1_id)
+                table1 = cur.execute("SELECT * FROM (%s);", table1_id)
             except:
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
-            table1_name = db.execute("SELECT name FROM tables WHERE id = ?", table1_id)[0]["name"]
-            table1_columns = db.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = ?", table1_id)
+            table1_name = cur.execute("SELECT name FROM tables WHERE id = %s;", table1_id)[0]["name"]
+            table1_columns = cur.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %s;", table1_id)
         else: # テーブルが選択されていない時
             return render_template("dblist.html", databases=databases, tables=tables)
         if table2_id: # テーブル2が選択されている時
             try:
-                table2 = db.session.execute("SELECT * FROM ?", table2_id)
+                table2 = cur.execute("SELECT * FROM (%s);", table2_id)
             except:
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
-            table2_name = db.execute("SELECT name FROM tables WHERE id = ?", table2_id)[0]["name"]
-            table2_columns = db.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = ?", table2_id)
+            table2_name = cur.execute("SELECT name FROM tables WHERE id = %s;", table2_id)[0]["name"]
+            table2_columns = cur.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %s;", table2_id)
         else: # テーブル1のみが選択されている時
             return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name)
         if table3_id: # テーブル3が選択されている時
             try:
-                table3 = db.session.execute("SELECT * FROM ?", table3_id)
+                table3 = cur.execute("SELECT * FROM %(s);", table3_id)
             except:
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
-            table3_name = db.execute("SELECT name FROM tables WHERE id = ?", table3_id)[0]["name"]
-            table3_columns = db.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = ?", table3_id)
+            table3_name = cur.execute("SELECT name FROM tables WHERE id = %s;", table3_id)[0]["name"]
+            table3_columns = cur.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %s;", table3_id)
+
+            #DBとの接続解除
+            cur.close()
+            connection.close()                  
+
             return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name, table2_id=table2_id, table2=table2, table2_columns=table2_columns, table2_name=table2_name, table3_id=table3_id, table3=table3, table3_columns=table3_columns, table3_name=table3_name)
+
         else: # テーブル1とテーブル2のみが選択されている時
             return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name, table2_id=table2_id, table2=table2, table2_columns=table2_columns, table2_name=table2_name)
+
 
 if __name__ == "__main__":
   app.run(debug=True)
