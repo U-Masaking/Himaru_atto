@@ -1,3 +1,4 @@
+from re import search
 from flask import Flask, flash, render_template, session, request, redirect, url_for
 from flask_session import Session
 from testProject.database import init_db, db
@@ -81,7 +82,7 @@ def search_highlight(query):
                     row = int(words[i+3])
                 else:
                     row = words[i+3]
-    # app.logger.debug(type(row))
+    app.logger.debug(type(row))
     return column, column2, row
 
 
@@ -180,9 +181,9 @@ def index_before(db_id, table1_name):
             # 全体テーブルでハイライトする部分の特定
             h_col, h_col2, h_row = search_highlight(query)
 
-            # app.logger.debug(h_col)
-            # app.logger.debug(h_col2)
-            # app.logger.debug(h_row)
+            app.logger.debug(h_col)
+            app.logger.debug(h_col2)
+            app.logger.debug(h_row)
 
             h_col_site, h_col2_site = 0, 0
             for i in range(len(table1_columns)):
@@ -191,8 +192,8 @@ def index_before(db_id, table1_name):
                 if h_col2 == table1_columns[i]:
                     h_col2_site = i+1
 
-            # app.logger.debug(h_col2_site)
-            # app.logger.debug(h_col_site)
+            app.logger.debug(h_col2_site)
+            app.logger.debug(h_col_site)
 
             return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
 
@@ -221,7 +222,17 @@ def index_before(db_id, table1_name):
 
             flash("データベースが編集されました")
 
-            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name)
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
 
     return render_template('index_before.html', table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
 
@@ -281,9 +292,9 @@ def index_after(db_id, table1_name):
             # 全体テーブルでハイライトする部分の特定
             h_col, h_col2, h_row = search_highlight(query)
 
-            # app.logger.debug(h_col)
-            # app.logger.debug(h_col2)
-            # app.logger.debug(h_row)
+            app.logger.debug(h_col)
+            app.logger.debug(h_col2)
+            app.logger.debug(h_row)
 
             h_col_site, h_col2_site = 0, 0
             for i in range(len(table1_columns)):
@@ -292,8 +303,8 @@ def index_after(db_id, table1_name):
                 if h_col2 == table1_columns[i]:
                     h_col2_site = i+1
 
-            # app.logger.debug(h_col2_site)
-            # app.logger.debug(h_col_site)
+            app.logger.debug(h_col2_site)
+            app.logger.debug(h_col_site)
 
             return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
 
@@ -322,6 +333,16 @@ def index_after(db_id, table1_name):
 
             flash("データベースが編集されました")
 
-            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name)
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
 
     return render_template('index_before.html', table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)

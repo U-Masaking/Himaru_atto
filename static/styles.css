@@ -3,7 +3,7 @@
 	width: 100%;
   }
   .leftside {
-	background: gray;
+	background: silver;
 	background-size: cover;
   }
   .rightside {
@@ -21,14 +21,18 @@
 	  padding:20px;
   }
 
+  .content3 {
+	  padding: 5px 20px;
+  }
+
   .column2 {
 	  height: 70vh;
 	  width: 100%;
   }
 
   .button {
-	  margin: 5%;
-	  margin-top: 5%;
+	  margin: 2%;
+	  margin-top: 2%;
   }
 
 
@@ -81,3 +85,12 @@ section.typeA input:checked + .tabLabel + .content {
 	transition: .5s opacity;
 	opacity: 1;
 }
+
+.letter_color {
+	color:white;
+}
+
+.scroll{
+	height: 85vh;
+	overflow: auto;
+  }

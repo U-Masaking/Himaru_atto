@@ -11,7 +11,8 @@
         <form action="/index_before/{{ id }}/{{ name }}" method="POST">
             <a href="/DBregister.html" class="btn btn-primary button">データベース登録</a>
             <a href="/DBlist.html" class="btn btn-primary button">データベース一覧</a>
-            <div class="content2">
+            <p class="text-center"><font size="2">※テンプレートを用いている場合、テーブル名は cp_template としてください</font></p>
+            <div class="content3">
                 <textarea name="Query" id="Query" cols="" rows="" class="column2" placeholder="ここにSQLクエリを入力してください"></textarea>
             </div>
             <button type="submit" name="send" value="temporary" class="btn btn-primary button">一時保存</button>
@@ -25,9 +26,9 @@
                 <input type="radio" id="TAB-A01" name="TAB-A" checked="checked">
                 <label for="TAB-A01" class="tabLabel">全体</label>
                 <div class="content">
-                    <div class="content2">
-                        <table class="table text-center table-bordered table-light">
-                            <tr>
+                    <div class="scroll">
+                        <table class="table text-center table-bordered border-dark table-hover">
+                            <tr class="table-light">
                                 {% for table1_column in table1_columns %}
                                     <th>{{ table1_column }}</th>
                                 {% endfor %}
@@ -35,7 +36,7 @@
                             {% set ns2 = namespace(cnt = 1) %}
 
                             {% for row in table1 %}
-                                <tr>
+                                <tr class="table-light">
                                     {% if h_col %}
                                         {% set ns = namespace(cnt = 1) %}
 
@@ -86,14 +87,20 @@
                                         {% if h_col2 %}
 
                                             {% set flag = {'value':False} %}
-                                            {% for sell in row %}
-                                                {% if sell == h_row and ns2.cnt == h_col2_site %}
-                                                    {% if flag.update({'value':True}) %}
+                                            {% set ns3 = namespace(cnt = 1) %}
+                                            {% if h_col2 %}
+                                                {% for sell in row %}
+                                                    {% if sell == h_row %}
+                                                        {% if ns3.cnt == h_col2_site %}
+                                                            {% set _=flag.update({'value':True}) %}
+                                                        {% endif %}
                                                     {% endif %}
-                                                {% endif %}
-                                            {% endfor %}
+                                                <!-- <td>{{ flag['value']}}</td> -->
+                                                    {% set ns3.cnt = ns3.cnt + 1%}
+                                                {% endfor %}
+                                            {% endif %}
 
-                                            {% if ns2.cnt == h_col2_site and flag['value'] == True %}
+                                            {% if flag['value'] == True %}
 
                                                 {% for sell in row %}
                                                     <td class="table-warning">{{ sell }}</td>
@@ -122,7 +129,7 @@
                 <input type="radio" id="TAB-A02" name="TAB-A">
                 <label for="TAB-A02" class="tabLabel">結果</label>
                 <div class="content">
-                    <div class="content2">
+                    <div class="scroll">
                         {% if operated_table %}
                                     <table class="table text-center table-bordered table-light">
                                         <tr>
