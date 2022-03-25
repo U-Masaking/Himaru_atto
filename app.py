@@ -12,7 +12,7 @@ import psycopg2
 
 
 app = Flask(__name__)
-
+app.secret_key = 'abcdefghijklmn'
 #島崎のローカルのdatabaseに接続
 connection = psycopg2.connect(host="localhost", database="users_test", user="a", password="password", port=5432)
 connection.autocommit = True
@@ -32,7 +32,11 @@ Session(app)
 # def index():
 #     return render_template("index.html")
 
+# https://shigeblog221.com/flask-session/
 @app.route("/")
+def login_():
+    if not session[session_id]
+
 def index():
     return render_template("index.html")
 
@@ -72,12 +76,10 @@ def login():
             else:
                 # cur.fetchall()                  
                 # cur.close()
-                # connection.close()                  
-                return render_template("index.html")    
+                # connection.close()  
+                session["user_id"] = i[0]                
+                return redirect("/")  
         # Remember which user has logged in
-        # for文使う必要あり
-        # session["user_id"] = rows[0]["id"]
-
         return render_template("error.html")
 
     # User reached route via GET (as by clicking a link or via redirect)
@@ -191,7 +193,6 @@ def dblist():
     # getの場合
     else:
         databases = cur.execute("SELECT * FROM databases WHERE user_id = %s;", "1")
-        print(database)
         # return render_template("dblist.html")
         # データベースを取得
         if session["user_id"]: # ログイン時
@@ -229,7 +230,7 @@ def dblist():
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
             table1_name = cur.execute("SELECT name FROM tables WHERE id = %s;", table1_id)[0]["name"]
-            table1_columns = cur.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %s;", table1_id)
+            table1_columns = cur.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %s;", table1_id)
         else: # テーブルが選択されていない時
             return render_template("dblist.html", databases=databases, tables=tables)
         if table2_id: # テーブル2が選択されている時
@@ -249,7 +250,7 @@ def dblist():
                 flash("エラーが発生しました", "failed")
                 return redirect("/")
             table3_name = cur.execute("SELECT name FROM tables WHERE id = %s;", table3_id)[0]["name"]
-            table3_columns = cur.session.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %s;", table3_id)
+            table3_columns = cur.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %s;", table3_id)
 
             #DBとの接続解除
             cur.close()
