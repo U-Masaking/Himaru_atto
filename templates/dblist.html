@@ -16,44 +16,44 @@
       <button type="button" class="btn btn-secondary" disabled>データベース一覧</button>
       <hr>
       <!-- データベース・テーブル一覧 -->
-      <form action="/dblist" methon="post" name="dblist">
+      <form action="/dblist" method="post" name="dblist">
         <ul>
           {% for database in databases %}
             <!-- データベース名 -->
             <li>
               <div class="h3">
-                {{ database.name }}
+                {{ database.3 }}
               </div>
             </li>
             <!-- テーブル -->
             {% for table in tables %}
-              {% if table.database_id == database.id %} <!-- 該当するデータベースかどうか -->
+              {% if table.2 == database.0 %} <!-- 該当するデータベースかどうか -->
               <div class="form-check">
                 <!-- チェックボックス -->
                 {% if table1_id and table2_id and table3_id %}
                   {% if table.id|int == table1_id|int or table.id|int == table2_id|int or table.id|int == table3_id|int %} <!-- すでに選択している時 -->
-                    <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
+                    <input class="form-check-input" type="checkbox" value="{{ table.0}}" name="table" id="{{ table.0 }}" checked>
                   {% else %}
-                     <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                     <input class="form-check-input" type="checkbox" value="{{ table.0 }}" name="table" id="{{ table.0 }}">
                   {% endif %}
                 {% elif table1_id and table2_id %} <!-- 選択していない時 -->
-                  {% if table.id|int == table1_id|int or table.id|int == table2_id|int %} <!-- すでに選択している時 -->
-                    <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
+                  {% if table.0|int == table1_id|int or table.id|int == table2_id|int %} <!-- すでに選択している時 -->
+                    <input class="form-check-input" type="checkbox" value="{{ table.0 }}" name="table" id="{{ table.0 }}" checked>
                   {% else %}
-                     <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                     <input class="form-check-input" type="checkbox" value="{{ table.0 }}" name="table" id="{{ table.0 }}">
                   {% endif %}
                 {% elif table1_id %}
-                  {% if table.id|int == table1_id|int %} <!-- すでに選択している時 -->
-                    <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}" checked>
+                  {% if table.0|int == table1_id|int %} <!-- すでに選択している時 -->
+                    <input class="form-check-input" type="checkbox" value="{{ table.0 }}" name="table" id="{{ table.0 }}" checked>
                   {% else %}
-                     <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                     <input class="form-check-input" type="checkbox" value="{{ table.0 }}" name="table" id="{{ table.0 }}">
                   {% endif %}
                 {% else %}
-                  <input class="form-check-input" type="checkbox" value="{{ table.id }}" name="table" id="{{ table.id }}">
+                  <input class="form-check-input" type="checkbox" value="{{ table.0 }}" name="table" id="{{ table.0 }}">
                 {% endif %}
                 <!-- テーブル名 -->
-                <label class="form-check-label" for="{{ table.id }}">
-                  {{ table.name }}
+                <label class="form-check-label" for="{{ table.0 }}">
+                  {{ table.1 }}
                 </label>
               </div>
               {% endif %}
@@ -80,17 +80,17 @@
                   <tr>
                     {% for table1_column in table1_columns %}
                       <th>
-                        {{ table1_column["name"] }}
+                        {{ table1_column }}
                       </th>
                     {% endfor %}
                   </tr>
                 </thead>
                 <tbody>
-                  {% for row in table1 %}
+                  {% for rows in table1 %}
                     <tr>
-                      {% for table1_column in table1_columns %}
+                      {% for row in rows %}
                         <td>
-                          {{ row[table1_column["name"]] }}
+                          {{ row }}
                         </td>
                       {% endfor %}
                     </tr>
