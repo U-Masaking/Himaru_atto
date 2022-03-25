@@ -1,0 +1,50 @@
+<!-- https://codepen.io/bowie/pen/njjaZo -->
+
+{% extends "layout.html" %} {% block title %} Register {% endblock %}
+{% block main %}
+<div class="form-register-wrapper">
+  <h1>ユーザー登録</h1>
+
+  <form action="/register" method="post">
+    <div class="form-item">
+      <input
+        autocomplete="off"
+        autofocus
+        class="form-control"
+        name="name"
+        placeholder="ユーザー名"
+        type="text"
+      />
+    </div>
+    <div class="form-item">
+      <input
+        autocomplete="off"
+        autofocus
+        class="form-control"
+        name="address"
+        placeholder="メールアドレス"
+        type="email"
+      />
+    </div>
+    <div class="form-item">
+      <input
+        class="form-control"
+        name="password"
+        placeholder="パスワード"
+        type="password"
+      />
+    </div>
+    <div class="form-item">
+      <input
+        class="form-control"
+        name="confirmation"
+        placeholder="パスワード確認"
+        type="password"
+      />
+    </div>
+    <div class="button-panel-register">
+      <input type="submit" class="button fas" title="登録" value="&#xf234;  登録"/>
+    </div>
+  </form>
+</div>
+{% endblock %}

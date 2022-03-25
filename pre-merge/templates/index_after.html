@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    index
+{% endblock %}
+
+{% block main %}
+
+<nav class="navbar navbar-expand-md navbar-light bg-light border">
+	<a class="navbar-brand" href="/"><span class="blue">C</span><span class="red">$</span><span class="yellow">5</span><span class="green">0</span> <span class="red">Finance</span></a>
+	<button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbar">
+		{% if session.user_id %}
+			<ul class="navbar-nav mr-auto mt-2">
+				<li class="nav-item"><a class="nav-link" href="/quote">Quote</a></li>
+				<li class="nav-item"><a class="nav-link" href="/buy">Buy</a></li>
+				<li class="nav-item"><a class="nav-link" href="/sell">Sell</a></li>
+				<li class="nav-item"><a class="nav-link" href="/history">History</a></li>
+			</ul>
+			<ul class="navbar-nav ml-auto mt-2">
+				<li class="nav-item"><a class="nav-link" href="/change_pw">Change Password</a></li>
+				<li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+			</ul>
+		{% else %}
+			<ul class="navbar-nav ml-auto mt-2">
+				<li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+				<li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+			</ul>
+		{% endif %}
+	</div>
+</nav>
+<br>
+
+<div class="wrapper">
+	<div class="column leftside">
+		<form action="/index_before" method="post">
+			<a href="/DBregister.html" class="btn btn-primary button">データベース登録</a>
+			<a href="/DBlist.html" class="btn btn-primary button">データベース一覧</a>
+			<div class="content2">
+				<textarea name="Query" id="Query" cols="" rows="" class="column2"></textarea>
+			</div>
+			<button type="submit" name="send" value="temporary" class="btn btn-primary button">一時保存</button>
+			<button type="submit" name="send" value="execute" class="btn btn-primary button">実行</button>
+		</form>
+	</div>
+	<div class="column rightside">
+		<div class="content2">
+			<section class="typeA">
+				<input type="radio" id="TAB-A01" name="TAB-A" checked="checked">
+				<label for="TAB-A01" class="tabLabel">全体</label>
+				<div class="content">
+					<div class="content2">
+						<table class="table">
+							<tr>
+								{% for column in columns %}
+									<th>{{ column["name"] }}</th>
+								{% endfor %}
+							</tr>
+							{% for row in table %}
+								<tr>
+
+								</tr>
+							{% endfor %}
+						</table>
+					</div>
+				</div>
+				<input type="radio" id="TAB-A02" name="TAB-A">
+				<label for="TAB-A02" class="tabLabel">結果</label>
+				<div class="content">
+					<div class="content2">
+						<p>ここにユーザーが選択したテーブルの表示</p>
+					</div>
+				</div>
+			</section>
+		</div>
+	</div>
+</div>
+
+<br><br>
+
+{% endblock %}

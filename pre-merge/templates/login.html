@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %} Login {% endblock %}
+
+{% block main %}
+<div class="form-wrapper">
+  <h1>ログイン</h1>
+
+    <form action="/login" method="post">
+        <div class="form-item">
+            <input autocomplete="off" autofocus class="form-control" name="name" placeholder="ユーザー名" type="text">
+        </div>
+        <div class="form-item">
+            <input class="form-control" name="password" placeholder="パスワード" type="password">
+        </div>
+        <div class="button-panel">
+            <input type="submit" class="button fas" title="ログイン" value="&#xf13e;   ログイン">
+        </div>
+    </form>
+  <div class="form-footer">
+    <p><a class = "createAccount" href="/register">アカウントを作成する</a></p>
+  </div>
+</div>
+{% endblock %}

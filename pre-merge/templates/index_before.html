@@ -1,0 +1,157 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    index
+{% endblock %}
+
+{% block main %}
+<div class="wrapper">
+    <div class="column leftside">
+        <form action="/index_before/{{ id }}/{{ name }}" method="POST">
+            <a href="/dbregister" class="btn btn-primary button-f">データベース登録</a>
+            <a href="/dblist" class="btn btn-primary button-f">データベース一覧</a>
+            <p class="text-center"><font size="2">※テンプレートを用いている場合、テーブル名は cp_template としてください</font></p>
+            <div class="content3">
+                <textarea name="Query" id="Query" cols="" rows="" class="column2" placeholder="ここにSQLクエリを入力してください"></textarea>
+            </div>
+            <button type="submit" name="send" value="temporary" class="btn btn-primary button-f">一時保存</button>
+            <button type="submit" name="send" value="execute" class="btn btn-primary button-f">実行</button>
+            <button type="submit" name="send" value="end" class="btn btn-primary button-f">終了</button>
+        </form>
+    </div>
+    <div class="column rightside">
+        <div class="content2">
+            <section class="typeA">
+                <input type="radio" id="TAB-A01" name="TAB-A" checked="checked">
+                <label for="TAB-A01" class="tabLabel">全体</label>
+                <div class="content">
+                    <div class="scroll">
+                        <table class="table text-center table-bordered border-dark table-hover">
+                            <tr class="table-light">
+                                {% for table1_column in table1_columns %}
+                                    <th>{{ table1_column }}</th>
+                                {% endfor %}
+                            </tr>
+                            {% set ns2 = namespace(cnt = 1) %}
+
+                            {% for row in table1 %}
+                                <tr class="table-light">
+                                    {% if h_col %}
+                                        {% set ns = namespace(cnt = 1) %}
+
+                                        {% set flag = {'value':False} %}
+                                        {% set ns3 = namespace(cnt = 1) %}
+                                        {% if h_col2 %}
+                                            {% for sell in row %}
+                                                {% if sell == h_row %}
+                                                    {% if ns3.cnt == h_col2_site %}
+                                                        {% set _=flag.update({'value':True}) %}
+                                                    {% endif %}
+                                                {% endif %}
+                                                <td>{{ flag['value']}}</td>
+                                                {% set ns3.cnt = ns3.cnt + 1%}
+                                            {% endfor %}
+                                        {% endif %}
+                                        <!-- <td>{{ flag['value']}}</td> -->
+
+                                        {% for sell in row %}
+                                            {% if ns.cnt == h_col_site %}
+                                                {% if h_col2 %}
+                                                    {% if flag['value'] == True %}
+                                                        <td class="table-warning">{{ sell }}</td>
+                                                        <!-- <td>{{ ns2.cnt }}, {{ h_col2_site }}, {{ flag['value'] }}</td> -->
+
+                                                    {% else %}
+                                                        <td>{{ sell }}</td>
+                                                        <!-- <td>{{ ns2.cnt }}, {{ h_col2_site }}, {{ flag['value'] }}</td> -->
+                                                    {% endif %}
+
+                                                {% else %}
+                                                    <td class="table-warning">{{ sell }}</td>
+
+                                                {% endif %}
+
+                                                {% set ns.cnt = ns.cnt + 1%}
+
+                                            {% else %}
+                                                <td>{{ sell }}</td>
+                                                {% set ns.cnt = ns.cnt + 1%}
+
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% set ns2.cnt = ns2.cnt + 1 %}
+
+                                    {% else %}
+                                        {% if h_col2 %}
+
+                                            {% set flag = {'value':False} %}
+                                            {% set ns3 = namespace(cnt = 1) %}
+                                            {% if h_col2 %}
+                                                {% for sell in row %}
+                                                    {% if sell == h_row %}
+                                                        {% if ns3.cnt == h_col2_site %}
+                                                            {% set _=flag.update({'value':True}) %}
+                                                        {% endif %}
+                                                    {% endif %}
+                                                <!-- <td>{{ flag['value']}}</td> -->
+                                                    {% set ns3.cnt = ns3.cnt + 1%}
+                                                {% endfor %}
+                                            {% endif %}
+
+                                            {% if flag['value'] == True %}
+
+                                                {% for sell in row %}
+                                                    <td class="table-warning">{{ sell }}</td>
+                                                {% endfor %}
+
+                                            {% else %}
+                                                {% for sell in row %}
+                                                    <td>{{ sell }}</td>
+                                                {% endfor %}
+                                            {% endif %}
+
+                                            {% set ns2.cnt = ns2.cnt + 1 %}
+
+                                        {% else %}
+                                            {% for sell in row %}
+                                                <td>{{ sell }}</td>
+                                            {% endfor %}
+                                            {% set ns2.cnt = ns2.cnt + 1 %}
+                                        {% endif %}
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <input type="radio" id="TAB-A02" name="TAB-A">
+                <label for="TAB-A02" class="tabLabel">結果</label>
+                <div class="content">
+                    <div class="scroll">
+                        {% if operated_table %}
+                                    <table class="table text-center table-bordered table-light">
+                                        <tr>
+                                            {% for o_table_column in o_table_columns %}
+                                                <th>{{ o_table_column }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                        {% for row in operated_table %}
+                                            <tr>
+                                                {% for sell in row %}
+                                                    <td>{{ sell }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                {% endif %}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<br><br>
+
+{% endblock %}
