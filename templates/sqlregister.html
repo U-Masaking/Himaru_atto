@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+SQLRegister
+{% endblock %}
+
+{% block main %}
+  <div class="text-center">
+    <div>
+      <p>CSVファイルからデータベースを登録</p>
+      <form action="/sqlregister" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="name" class="form-label">データベース名</label>
+          <input type="text" class="form-control" name="name">
+        </div>
+        <p>テーブルファイル</p>
+        <div class="input-group mb-3">
+          <input type="file" class="form-cotrol" name="file">
+        </div>
+        <button class="btn btn-primary" type="submit">Upload</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

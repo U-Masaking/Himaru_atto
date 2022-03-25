@@ -17,12 +17,14 @@
 
     <!-- タイトル -->
     <title>{% block title %}{% endblock %}</title>
+
+    <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
   </head>
   <body>
     <!-- ナビゲーションバー -->
     <nav class="navbar navbar-expand-md navbar-light bg-light border">
       <!-- タイトル -->
-      <a class="navbar-brand" href="/">SQLearning</a>
+      <a class="navbar-brand"  href="/"><i class="fas fa-database fa-fw"></i>SQLearning</a>
       <!-- 引き出しボタン -->
       <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
         <span class="navbar-toggler-icon"></span>
@@ -38,13 +40,13 @@
         <!-- 右側 -->
         {% if session.user_id %}
           <ul class="navbar-nav ml-auto mt-2">
-            <li class="nav-item"><a class="nav-link" href="/changeprofile">登録情報変更</a></li>
-            <li class="nav-item"><a class="nav-link" href="/logout">ログアウト</a></li>
+            <li class="nav-item"><a class="nav-link" href="/changeprofile"><i class="fas fa-user fa-fw"></i>登録情報変更</a></li>
+            <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-arrow-right-from-bracket fa-fw"></i>ログアウト</a></li>
           </ul>
         {% else %}
           <ul class="navbar-nav ml-auto mt-2">
-            <li class="nav-item"><a class="nav-link" href="/register">ユーザー登録</a></li>
-            <li class="nav-item"><a class="nav-link" href="/login">ログイン</a></li>
+            <li class="nav-item"><a class="nav-link" href="/register"><i class="fas fa-user-plus fa-fw"></i>ユーザー登録</a></li>
+            <li class="nav-item"><a class="nav-link" href="/login"><i class="fas fa-unlock-keyhole fa-fw"></i>ログイン</a></li>
           </ul>
         {% endif %}
       </div>
