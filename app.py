@@ -50,6 +50,39 @@ cur = connection.cursor()
 # db.create_all()
 
 
+def search_highlight(query):
+
+    words = re.split('[ ,()]', query)
+    column = ''
+    column2 = ''
+    row = ''
+
+    # select文のとき
+    if words[0][0] == 's' or words[0][0] =='S':
+        column = words[1]
+
+        if len(words) >= 5:
+            for i in range(len(words)):
+                if words[i].lower() == 'where':
+                    column2 = words[i + 1]
+                    if words[i+3][0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                        row = int(words[i+3])
+                    else:
+                        row = words[i+3]
+
+    # updateのとき
+    if words[0][0] == 'u' or words[0][0] == 'U':
+        column = ''
+        for i in range(len(words)):
+            if words[i].lower() == 'where':
+                column2 = words[i+1]
+                if words[i+3][0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                    row = int(words[i+3])
+                else:
+                    row = words[i+3]
+    # app.logger.debug(type(row))
+    return column, column2, row
+
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -143,7 +176,125 @@ def index_before(db_id, table1_name):
 
             o_table_columns = [col.name for col in cur.description]
 
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            # app.logger.debug(h_col)
+            # app.logger.debug(h_col2)
+            # app.logger.debug(h_row)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            # app.logger.debug(h_col2_site)
+            # app.logger.debug(h_col_site)
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
+
+
+        # 実行した場合
+        if request.form['send'] == 'execute':
+            try :
+                cur.execute(query)
+            except :
+                flash("SQL構文が間違っています")
+                return render_template("index_before.html", table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+            # 入力がselect文のとき
+            if query[0] == 's' or query[0] == 'S':
+                operated_table = cur.fetchall()
+
+            # select文以外
+            else:
+                cur.execute("select * from %(name)s" % {'name':table1_name})
+                operated_table = cur.fetchall()
+
+            o_table_columns = [col.name for col in cur.description]
+
+            if transaction_flag == True:
+                cur.execute("COMMIT;")
+
+            flash("データベースが編集されました")
+
             return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name)
+
+    return render_template('index_before.html', table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+
+@app.route("/index_after/<int:db_id>/<string:table1_name>", methods=["GET", "POST"])
+def index_after(db_id, table1_name):
+    # userID = session["user_id"]
+    transaction_flag = False
+
+    cur.execute("SELECT * FROM %(name)s" % {'name':table1_name})
+    table1 = cur.fetchall()
+
+    # cur.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %(name)s" % {'name':table1_name})
+    table1_columns = [col.name for col in cur.description]
+
+    # postのとき
+    if request.method == "POST":
+
+        # 終了ボタンが押されたとき
+        if request.form['send'] == 'end':
+
+            if transaction_flag == True:
+                cur.execute("ROLLBACK;")
+
+            if table1_name == "cp_template":
+                cur.execute("drop table if exists cp_template")
+
+            return redirect(url_for('home'))
+
+        query = request.form.get("Query")
+
+        # 一時保存の場合
+        if request.form['send'] == 'temporary':
+            if transaction_flag == False:
+                transaction_flag = True
+                cur.execute("BEGIN;")
+
+            try :
+                cur.execute(query)
+            except :
+                flash("SQL構文が間違っています")
+                return render_template("index_before.html", table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+            # 入力がselect文のとき
+            if query[0] == 's' or query[0] == 'S':
+
+                # ユーザーが捜査した後のテーブル取得
+                operated_table = cur.fetchall()
+
+            # select文以外
+            else:
+                cur.execute("select * from %(name)s" % {'name':table1_name})
+                operated_table = cur.fetchall()
+
+            o_table_columns = [col.name for col in cur.description]
+
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            # app.logger.debug(h_col)
+            # app.logger.debug(h_col2)
+            # app.logger.debug(h_row)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            # app.logger.debug(h_col2_site)
+            # app.logger.debug(h_col_site)
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
 
 
         # 実行した場合
