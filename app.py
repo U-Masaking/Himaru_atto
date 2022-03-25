@@ -6,6 +6,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 import testProject.models
 import psycopg2
 import sqlalchemy
+import re
 
 from tempfile import mkdtemp
 
