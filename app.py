@@ -21,13 +21,13 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 Session(app)
 
 
-connection = psycopg2.connect(host="localhost", database="testDB", user="postgres", password="724817tf", port=5432)
+connection = psycopg2.connect(host="localhost", database="Sample", user="postgres", password="724817tf", port=5432)
 connection.autocommit = False
 cur = connection.cursor()
 
 
 
-# DATABASE = "postgresql+psycopg2://postgres:724817tf@localhost:5432/testDB"
+# DATABASE = "postgresql+psycopg2://postgres:724817tf@localhost:5432/Sample"
 
 # engine = sqlalchemy.create_engine(
 #     DATABASE,
@@ -35,7 +35,7 @@ cur = connection.cursor()
 #     echo=True
 # )
 
-# # app.config.from_object('testDB.config.Config')
+# # app.config.from_object('Sample.config.Config')
 
 # db = SQLAlchemy(app)
 
@@ -113,9 +113,9 @@ def home():
             return render_template("home.html")
 
         # templateが選択されたときのテーブルの複製
-        if tb_name == "template1":
-            cur.execute("create table cp_template (like template1 including all)")
-            cur.execute("insert into cp_template select * from template1")
+        if tb_name == "harry_potter":
+            cur.execute("create table cp_template (like harry_potter including all)")
+            cur.execute("insert into cp_template select * from harry_potter")
             cur.execute("insert into tables (name, database_id) values ('cp_template', 1)")
             tb_name = "cp_template"
 

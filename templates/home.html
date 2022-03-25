@@ -1,0 +1,57 @@
+{% extends "rayout.html" %}
+
+{% block title %}
+    home
+{% endblock %}
+
+{% block main %}
+
+<div class="wrapper">
+    <div class="column leftside">
+        <!-- <form action="/index_before" method="post"> -->
+            <a href="/DBregister.html" class="btn btn-primary button">データベース登録</a>
+            <a href="/DBlist.html" class="btn btn-primary button">データベース一覧</a>
+            <div class="content2">
+                <textarea name="Query" id="Query" cols="" rows="" class="column2" placeholder="ここにSQLクエリを入力します"></textarea>
+            </div>
+            <button type="submit" name="send" value="temporary" class="btn btn-primary button">一時保存</button>
+            <button type="submit" name="send" value="execute" class="btn btn-primary button">実行</button>
+        <!-- </form> -->
+    </div>
+    <div class="column rightside">
+        <div class="content2">
+            <section class="typeA">
+                <input type="radio" id="TAB-A01" name="TAB-A" checked="checked">
+                <label for="TAB-A01" class="tabLabel">全体</label>
+                <div class="content">
+                    <div class="content2">
+						<p class="letter_color">ここにテーブルが表示されます</p>
+						<br>
+						<p class="letter_color">表示したいデータベースとテーブルを入力してください</p>
+						<p class="letter_color">テンプレートを使いたい場合はデータベース名に Sample テーブル名に harry_potter と入力してください</p>
+                    </div>
+                </div>
+                <input type="radio" id="TAB-A02" name="TAB-A">
+                <label for="TAB-A02" class="tabLabel">結果</label>
+                <div class="content">
+                    <div class="content2">
+                        <p class="letter_color">クエリの実行結果が表示されます</p>
+                    </div>
+                </div>
+            </section>
+			<form action="/" method="POST">
+				<div class="form-group">
+					<input type="text" placeholder="データべース名" name="db_name" class="form-control">
+				</div>
+				<div class="form-group">
+					<input type="text" placeholder="テーブル名" name="table_name" class="form-control">
+				</div>
+				<button type="submit" class="btn btn-primary">表示</button>
+			</form>
+        </div>
+    </div>
+</div>
+
+<br><br>
+
+{% endblock %}
