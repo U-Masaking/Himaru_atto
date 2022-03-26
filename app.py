@@ -1,115 +1,328 @@
-shimazaki_test
-import os
-
-from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, render_template, request, redirect, session, url_for
+from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
+import sqlalchemy
+from sqlalchemy.orm import scoped_session, sessionmaker
+import psycopg2
+import re
 
-from helpers import apology, login_required, lookup, usd
 
-# Configure application
 app = Flask(__name__)
+app.secret_key = 'abcdefghijklmn'
+#島崎のローカルのdatabaseに接続
+connection = psycopg2.connect(host="localhost", database="mydb", user="postgres", password="0627", port=5432)
+connection.autocommit = True
+cur = connection.cursor()
+cur.execute("select version()")
+print(connection.get_backend_pid())
 
-# Ensure templates are auto-reloaded
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-
-# Ensure responses aren't cached
-@app.after_request
-def after_request(response):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
-    return response
-
-    git
-
-
-# Custom filter
-app.jinja_env.filters["usd"] = usd
-
-# Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_FILE_DIR"] = mkdtemp()
+# SQLAlchemy の設定
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.py'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+def search_highlight(query):
 
-# Make sure API key is set
-if not os.environ.get("API_KEY"):
-    raise RuntimeError("API_KEY not set")
+    words = re.split('[ ,()]', query)
+    column = ''
+    column2 = ''
+    row = ''
+
+    # select文のとき
+    if words[0][0] == 's' or words[0][0] =='S':
+        column = words[1]
+
+        if len(words) >= 5:
+            for i in range(len(words)):
+                if words[i].lower() == 'where':
+                    column2 = words[i + 1]
+                    if words[i+3][0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                        row = int(words[i+3])
+                    else:
+                        row = words[i+3]
+
+    # updateのとき
+    if words[0][0] == 'u' or words[0][0] == 'U':
+        column = ''
+        for i in range(len(words)):
+            if words[i].lower() == 'where':
+                column2 = words[i+1]
+                if words[i+3][0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+                    row = int(words[i+3])
+                else:
+                    row = words[i+3]
+    app.logger.debug(type(row))
+    return column, column2, row
 
 
-@app.route("/")
-@login_required
-def index():
-    """Show portfolio of stocks"""
-    user_id = session["user_id"]
-    stocks = db.execute("SELECT symbol, company_name, price, SUM(shares) as count FROM transactions WHERE user_id=? GROUP BY symbol", user_id)
-    cash = db.execute("SELECT cash FROM users WHERE id=?", user_id)[0]["cash"]
-    
-    total = cash
-    for stock in stocks:
-        total += stock["count"] * stock["price"]
-
-    return render_template("index.html", stocks=stocks, cash=cash, total=total)
-
-
-@app.route("/buy", methods=["GET", "POST"])
-@login_required
-def buy():
-    """Buy shares of stock"""
+@app.route("/", methods=["GET", "POST"])
+def home():
+    # postのときの処理
     if request.method == "POST":
 
-        if not request.form.get("symbol"):
-            return apology("MISSING SYMBOL", 400)
+        # 値の取得とエラーチェック
+        db_name = request.form.get("db_name")
+        tb_name = request.form.get("table_name")
 
-        elif not request.form.get("shares"):
-            return apology("MISSING SHARES", 400)
+        cur.execute("SELECT name FROM databases")
+        db_list = cur.fetchall()
 
-        symbol = request.form.get("symbol").upper()
-        if lookup(symbol) is None:
-            return apology("INVALID SYMBOL", 400)
-        
-        try:
-            shares = int(request.form.get("shares"))
-        except:
-            return apology("INVALID SYMBOL", 400)
-            
-        if shares <= 0:
-            return apology("INVALID SHARES", 400)
+        if db_name not in db_list[0]:
+            flash("データベースが存在しません")
+            return render_template("home.html")
 
-        response = lookup(symbol)
-        price = response["price"]
-        total = price * shares
-        cash = db.execute("SELECT cash FROM users WHERE id=?", session["user_id"])[0]["cash"]
+        cur.execute("SELECT id FROM databases WHERE name = %(db_name)s", {'db_name':db_name})
+        db_id = cur.fetchall()[0][0]
 
-        if cash < total:
-            return apology("CAN'T AFFORD", 400)
-        else:
-            db.execute("UPDATE users SET cash=? WHERE id=?", cash - total, session["user_id"])
-            db.execute("INSERT INTO transactions (user_id, symbol, company_name, shares, price, total) VALUES(?,?,?,?,?,?)"
-            , session["user_id"], response["symbol"], response["name"], shares, price, total)
+        cur.execute("SELECT name FROM tables WHERE database_id = %(db_id)s" % {'db_id':db_id})
+        tb_list = cur.fetchall()
 
-        return redirect("/")
-    else:
-        return render_template("buy.html")
+        if tb_name not in tb_list[0]:
+            flash("テーブルが存在しません")
+            return render_template("home.html")
 
+        # templateが選択されたときのテーブルの複製
+        if tb_name == "harry_potter":
+            cur.execute("create table cp_template (like harry_potter including all)")
+            cur.execute("insert into cp_template select * from harry_potter")
+            cur.execute("insert into tables (name, database_id) values ('cp_template', 1)")
+            tb_name = "cp_template"
 
-@app.route("/history")
-@login_required
-def history():
-    """Show history of transactions"""
-    user_id = session["user_id"]
-    stocks = db.execute("SELECT * FROM transactions WHERE user_id=?", user_id)
-    return render_template("history.html", stocks=stocks)
+        # 選択されたテーブルとデータベースの表示
+        return redirect(url_for('index_before', db_id=db_id, table1_name=tb_name))
+
+    # getのとき
+    return render_template("home.html")
 
 
+@app.route('/index_before/<int:db_id>/<string:table1_name>', methods=["GET", "POST"])
+def index_before(db_id, table1_name):
+    # userID = session["user_id"]
+    transaction_flag = False
+
+    cur.execute("SELECT * FROM %(name)s" % {'name':table1_name})
+    table1 = cur.fetchall()
+
+    # cur.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %(name)s" % {'name':table1_name})
+    table1_columns = [col.name for col in cur.description]
+
+    # postのとき
+    if request.method == "POST":
+
+        # 終了ボタンが押されたとき
+        if request.form['send'] == 'end':
+
+            if transaction_flag == True:
+                cur.execute("ROLLBACK;")
+
+            if table1_name == "cp_template":
+                cur.execute("drop table if exists cp_template")
+                cur.execute("delete from tables where name='cp_template'")
+
+            return redirect(url_for('home'))
+
+        query = request.form.get("Query")
+
+        # 一時保存の場合
+        if request.form['send'] == 'temporary':
+            if transaction_flag == False:
+                transaction_flag = True
+                cur.execute("BEGIN;")
+
+            try :
+                cur.execute(query)
+            except :
+                flash("SQL構文が間違っています")
+                return render_template("index_before.html", table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+            # 入力がselect文のとき
+            if query[0] == 's' or query[0] == 'S':
+
+                # ユーザーが捜査した後のテーブル取得
+                operated_table = cur.fetchall()
+
+            # select文以外
+            else:
+                cur.execute("select * from %(name)s" % {'name':table1_name})
+                operated_table = cur.fetchall()
+
+            o_table_columns = [col.name for col in cur.description]
+
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            app.logger.debug(h_col)
+            app.logger.debug(h_col2)
+            app.logger.debug(h_row)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            app.logger.debug(h_col2_site)
+            app.logger.debug(h_col_site)
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
+
+
+        # 実行した場合
+        if request.form['send'] == 'execute':
+            try :
+                cur.execute(query)
+            except :
+                flash("SQL構文が間違っています")
+                return render_template("index_before.html", table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+            # 入力がselect文のとき
+            if query[0] == 's' or query[0] == 'S':
+                operated_table = cur.fetchall()
+
+            # select文以外
+            else:
+                cur.execute("select * from %(name)s" % {'name':table1_name})
+                operated_table = cur.fetchall()
+
+            o_table_columns = [col.name for col in cur.description]
+
+            if transaction_flag == True:
+                cur.execute("COMMIT;")
+
+            flash("データベースが編集されました")
+
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
+
+    return render_template('index_before.html', table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+
+@app.route("/index_after/<int:db_id>/<string:table1_name>", methods=["GET", "POST"])
+def index_after(db_id, table1_name):
+    # userID = session["user_id"]
+    transaction_flag = False
+
+    cur.execute("SELECT * FROM %(name)s" % {'name':table1_name})
+    table1 = cur.fetchall()
+
+    # cur.execute("SELECT column_name AS name FROM information_schema.columns WHERE table_name = %(name)s" % {'name':table1_name})
+    table1_columns = [col.name for col in cur.description]
+
+    # postのとき
+    if request.method == "POST":
+
+        # 終了ボタンが押されたとき
+        if request.form['send'] == 'end':
+
+            if transaction_flag == True:
+                cur.execute("ROLLBACK;")
+
+            if table1_name == "cp_template":
+                cur.execute("drop table if exists cp_template")
+
+            return redirect(url_for('home'))
+
+        query = request.form.get("Query")
+
+        # 一時保存の場合
+        if request.form['send'] == 'temporary':
+            if transaction_flag == False:
+                transaction_flag = True
+                cur.execute("BEGIN;")
+
+            try :
+                cur.execute(query)
+            except :
+                flash("SQL構文が間違っています")
+                return render_template("index_before.html", table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+            # 入力がselect文のとき
+            if query[0] == 's' or query[0] == 'S':
+
+                # ユーザーが捜査した後のテーブル取得
+                operated_table = cur.fetchall()
+
+            # select文以外
+            else:
+                cur.execute("select * from %(name)s" % {'name':table1_name})
+                operated_table = cur.fetchall()
+
+            o_table_columns = [col.name for col in cur.description]
+
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            app.logger.debug(h_col)
+            app.logger.debug(h_col2)
+            app.logger.debug(h_row)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            app.logger.debug(h_col2_site)
+            app.logger.debug(h_col_site)
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
+
+
+        # 実行した場合
+        if request.form['send'] == 'execute':
+            try :
+                cur.execute(query)
+            except :
+                flash("SQL構文が間違っています")
+                return render_template("index_before.html", table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+            # 入力がselect文のとき
+            if query[0] == 's' or query[0] == 'S':
+                operated_table = cur.fetchall()
+
+            # select文以外
+            else:
+                cur.execute("select * from %(name)s" % {'name':table1_name})
+                operated_table = cur.fetchall()
+
+            o_table_columns = [col.name for col in cur.description]
+
+            if transaction_flag == True:
+                cur.execute("COMMIT;")
+
+            flash("データベースが編集されました")
+
+            # 全体テーブルでハイライトする部分の特定
+            h_col, h_col2, h_row = search_highlight(query)
+
+            h_col_site, h_col2_site = 0, 0
+            for i in range(len(table1_columns)):
+                if h_col == table1_columns[i]:
+                    h_col_site = i+1
+                if h_col2 == table1_columns[i]:
+                    h_col2_site = i+1
+
+            return render_template("index_before.html", table1=table1, table1_columns=table1_columns, operated_table=operated_table, o_table_columns=o_table_columns, id=db_id, name=table1_name, h_col=h_col, h_col2=h_col2, h_row=h_row, h_col_site=h_col_site, h_col2_site=h_col2_site)
+
+    return render_template('index_before.html', table1=table1, table1_columns=table1_columns, id=db_id, name=table1_name)
+
+# https://shigeblog221.com/flask-session/
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -121,30 +334,88 @@ def login():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 403)
+        if not request.form.get("name"):
+            return render_template("error.html")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password", 403)
+            return render_template("error.html")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
-
-        # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return apology("invalid username and/or password", 403)
-
+        cur.execute("SELECT * FROM users WHERE name = %s;",
+                          (request.form.get("name"),))
+        for i in cur:
+            if len(i) != 4 or not check_password_hash(i[3], request.form.get("password")):
+                print("error hash")
+                # cur.fetchall()
+                # cur.close()
+                # connection.close()
+                return render_template("error.html")
+            else:
+                # cur.fetchall()
+                # cur.close()
+                # connection.close()
+                session["user_id"] = i[0]
+                return redirect("/")
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
-
-        # Redirect user to home page
-        return redirect("/")
+        return render_template("error.html")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
 
+
+def index():
+    session.get('session_id', 1)
+    return render_template("home.html")
+
+@app.route("/error")
+# @login_required
+def error():
+    return render_template("error.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+
+    # GETリクエストなら、登録画面を表示する
+    if request.method == "GET":
+        return render_template("register.html")
+
+    # POSTリクエストなら、usernameやpasswordの情報が送られているということ。
+    # よってデータベースにusername, address, passwordを追加する
+    if request.method == "POST":
+        # まずusernameとpasswordが入力されているか確かめる。
+        if not request.form.get("name"):
+            flash("『ユーザー名』に入力してください","failed")
+            return redirect("/register")
+        elif not request.form.get("address"):
+            flash("『メールアドレス』に入力してください","failed")
+            return render_template("register.html")
+        elif not request.form.get("password"):
+            flash("『パスワード』に入力してください","failed")
+            return render_template("register.html")
+
+        elif not request.form.get("confirmation"):
+            flash("『パスワード確認』に入力してください","failed")
+            return render_template("register.html")
+
+        elif request.form.get("confirmation") != request.form.get("password"):
+            flash("1回目と2回目のパスワードが違います","failed")
+            return render_template("register.html")
+
+        else:
+            cur.execute("SELECT * FROM users;")
+            # for i in cur:
+            #     print(i)
+            cur.execute("INSERT INTO users (name, address, hash) VALUES (%s, %s, %s);",
+                       (request.form.get("name"), request.form.get("address"), generate_password_hash(request.form.get("password"), method='sha256')))
+
+            flash("登録しました","success")
+            cur.execute("select * from users where name = 'd'")
+            app.logger.debug(cur.fetchall())
+            return redirect("/login")
 
 @app.route("/logout")
 def logout():
@@ -156,112 +427,135 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
+# @app.route("/sqllist")
+# def sqllist():
+#   databases = Database.query.all()
+#   tables = Table.query.all()
+#   return render_template("sqllist.html", databases=databases, tabales=tables)
 
-@app.route("/quote", methods=["GET", "POST"])
-@login_required
-def quote():
-    """Get stock quote."""
+
+@app.route("/dbregister", methods=['GET', 'POST'])
+def sqlregister():
+  if request.method =="POST":
+    name = request.form.get("name")
+    file = request.files['file']
+
+    print(file)
+
+    with open(file, "r") as f:
+      print(f.read())
+
+    # database = Database(user_id=,name=)
+    # table = Table(database_id=,name=)
+
+    # db.session.add(database, table)
+    # db.session.commit()
+
+    # return redirect(url_for('dblist', table1_id=table_ids[0]))
+    return redirect("/dblist")
+
+  else:
+    return render_template("dbregister.html")
+
+@app.route("/dblist", methods=["GET", "POST"])
+def dblist():
+    # postの場合
     if request.method == "POST":
+        # 選択したテーブルIDを取得
+        table_ids = request.form.getlist("table")
+        
+        # 選択した個数の例外処理
+        if len(table_ids) == 0: # 選択されていない場合
+            flash("テーブルを選択してください", "failed")
+            return redirect("/dblist")
+        elif len(table_ids) > 3: # 4つ以上選択されている場合
+            flash("テーブルを3つまで選択してください", "failed")
+            return redirect("/dblist")
+        
+        # 画面遷移
+        if len(table_ids) == 3: # テーブル1が選択されている時
+            return redirect(url_for('dblist', table1_id=table_ids[0], table2_id=table_ids[1], table3_id=table_ids[2]))
+        elif len(table_ids) == 2:
+            return redirect(url_for('dblist', table1_id=table_ids[0], table2_id=table_ids[1]))
+        elif len(table_ids) == 1:
+            return redirect(url_for('dblist', table1_id=table_ids[0]))
 
-        if  not request.form.get("symbol"):
-            return apology("MISSING SYMBOL", 400)
-
-        symbol = request.form.get("symbol")
-        if lookup(symbol) is None:
-            return apology("INVALID SYMBOL", 400)
-
-        response = lookup(symbol)
-
-        return render_template("quoted.html", name=response["name"], price=response["price"], symbol=response["symbol"])
+    # getの場合
     else:
-        return render_template("quote.html")
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    """Register user"""
-    if request.method == "POST":
-
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 400)
-
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 400)
-
-        # Ensure confirmation password submitted
-        elif not request.form.get("confirmation"):
-            return apology("must provide confirmation", 400)
-
-        username = request.form.get("username")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirmation")
-        rows = db.execute("SELECT * FROM users WHERE username = ?", username)
-
-        if password != confirmation:
-            return apology("password didn't match")
-
-        # Add user to database
-        hash = generate_password_hash(password)
-        try:
-            db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", username, hash)
-            return redirect("/")
+        # データベースを取得
+        try: # ログイン時
+            cur.execute("SELECT * FROM databases WHERE user_id = 1")
+            databases = cur.fetchall()
         except:
-            return apology("username is already taken", 400)
+            try: # 未ログイン時
+                id = session.get("session_id")
+                cur.execute("SELECT * FROM databases WHERE session_id = %s;", (id))
+                databases = cur.fetchall()
+            except: # エラー時
+                flash("エラーが発生しました", "failed")
+                #return redirect("/")
 
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("register.html")
-
-
-@app.route("/sell", methods=["GET", "POST"])
-@login_required
-def sell():
-    """Sell shares of stock"""
-    user_id = session["user_id"]
-    
-    if request.method == "POST":
-        symbol = request.form.get("symbol")
-        shares = int(request.form.get("shares"))
+        # 該当するデータベースがない場合
+        if not databases:
+            flash("データベースを登録してください", "failed")
+            return render_template("dbregister.html")
         
-        if not symbol:
-            return apology("MISSING SYMBOL", 400)
-            
-        elif not shares:
-            return apology("MISSING SHARES", 400)
-            
-        elif shares < 1:
-            return apology("INVALID SHARES", 400)
-        
-        rows = db.execute("SELECT symbol, company_name, price, SUM(shares) as count FROM transactions WHERE user_id=? AND symbol=? GROUP BY symbol", user_id, symbol)
-        
-        if len(rows) == 0:
-            return apology("INVALID SYMBOL", 400)
-            
-        elif rows[0]["count"] < shares:
-            return apology("TOO MANY SHARES", 400)
-        
-        sell = shares * rows[0]["price"]
-        
-        cash = db.execute("SELECT cash FROM users WHERE id=?", user_id)[0]["cash"]
-        db.execute("UPDATE users SET cash=? WHERE id=?", cash + sell, session["user_id"])
-        db.execute("INSERT INTO transactions (user_id, symbol, company_name, shares, price, total) VALUES(?,?,?,?,?,?)"
-        , user_id, rows[0]["symbol"], rows[0]["company_name"], -shares, rows[0]["price"], sell)
-            
-        return redirect("/")
-    else:
-        symbols = db.execute("SELECT symbol FROM transactions WHERE user_id=? GROUP BY symbol", user_id)
-        return render_template("sell.html", symbols=symbols)
+        # データベースidと合致するテーブルを取得
+        tables = []
+        for database in databases:
+            cur.execute("SELECT * FROM tables WHERE database_id = %s;", (database[0],))
+            rows = cur.fetchall()
+            tables.extend(rows)
 
+        # 画面右側に表示するテーブル
+        table1_id = request.args.get("table1_id")
+        table2_id = request.args.get("table2_id")
+        table3_id = request.args.get("table3_id")
 
-def errorhandler(e):
-    """Handle error"""
-    if not isinstance(e, HTTPException):
-        e = InternalServerError()
-    return apology(e.name, e.code)
+        # 画面遷移
+        if table1_id: # テーブル1が選択されている時
+            try:
+                cur.execute("SELECT name FROM tables WHERE id = %s;", table1_id)
+            except:
+                flash("エラーが発生しました", "failed")
+                return redirect("/")
+            table1_names = cur.fetchall()
+            table1_name = table1_names[0][0]
+            cur.execute("SELECT * FROM harry_potter;")#, (table1_name,))
+            table1 = cur.fetchall()
+            table1_columns = [col.name for col in cur.description]
+        else: # テーブルが選択されていない時
+            return render_template("dblist.html", databases=databases, tables=tables)
+        if table2_id: # テーブル2が選択されている時
+            try:
+                cur.execute("SELECT name FROM tables WHERE id = %s;", table2_id)
+            except:
+                flash("エラーが発生しました", "failed")
+                return redirect("/")
+            table2_names = cur.fetchall()
+            table2_name = table2_names[0][0]
+            cur.execute("SELECT * FROM Music_rank;")
+            table2 = cur.fetchall()
+            table2_columns = [col.name for col in cur.description]
+        else: # テーブル1のみが選択されている時
+            return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name)
+        if table3_id: # テーブル3が選択されている時
+            try:
+                cur.execute("SELECT name FROM tables WHERE id = %s;", table3_id)
+            except:
+                flash("エラーが発生しました", "failed")
+                return redirect("/")
+            table3_names = cur.fetchall()
+            table3_name = table3_names[0][0]
+            cur.execute("SELECT * FROM %(%s);", table3_name)
+            table3 = cur.fetchall()
+            table3_columns = [col.name for col in cur.description]
 
+            #DBとの接続解除
+            cur.close()
+            connection.close()                  
 
-# Listen for errors
-for code in default_exceptions:
-    app.errorhandler(code)(errorhandler)
+            return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name, table2_id=table2_id, table2=table2, table2_columns=table2_columns, table2_name=table2_name, table3_id=table3_id, table3=table3, table3_columns=table3_columns, table3_name=table3_name)
+
+        else: # テーブル1とテーブル2のみが選択されている時
+            return render_template("dblist.html", databases=databases, tables=tables, table1_id=table1_id, table1=table1, table1_columns=table1_columns, table1_name=table1_name, table2_id=table2_id, table2=table2, table2_columns=table2_columns, table2_name=table2_name)
