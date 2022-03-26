@@ -1,0 +1,150 @@
+.sqlist {
+  display: none;
+  position: fixed;
+  z-index : 1;
+  left:0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.sqlist_content {
+  background-color: #f4f4f4;
+  margin: 10% auto;
+  width: 50%;
+  box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2),0 7px 20px 0 rgba(0,0,0,0.17);
+  animation-name: modalopen;
+  animation-duration: 1s;
+}
+
+.sqlist_content span {
+  color: gray;
+}
+
+.question {
+  display: none;
+  position: fixed;
+  z-index : 1;
+  left:0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.question_content {
+  background-color: #f4f4f4;
+  margin: 20% auto;
+  width: 70%;
+  box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2),0 7px 20px 0 rgba(0,0,0,0.17);
+  animation-name: modalopen;
+  animation-duration: 1s;
+}
+
+.question_content span {
+  color: gray;
+}
+
+.card {
+  display: block;
+}
+
+.column {
+	height: 100vh;
+	width: 100%;
+  }
+  .leftside {
+	background: silver;
+	background-size: cover;
+  }
+  .rightside {
+	background: black;
+	background-size: cover;
+  }
+
+  @media all and (min-width: 700px) {
+	.wrapper {
+	  display: flex;
+	}
+  }
+
+  .content2 {
+	  padding:20px;
+  }
+
+  .content3 {
+	  padding: 5px 20px;
+  }
+
+  .column2 {
+	  height: 70vh;
+	  width: 100%;
+  }
+
+  .button-f {
+	  margin: 2%;
+	  margin-top: 2%;
+  }
+
+
+
+
+  /*ベース*/
+section.typeA{
+	display: flex;
+	flex-wrap: wrap;
+}
+section.typeA::after {
+	content: '';
+	width: 100%;
+	height: 3px;
+	order: -1;
+	display: block;
+	background: rgba(0,137,167,.7);
+}
+section.typeA .tabLabel {	/* タブ */
+	margin-right: 3px;
+	padding: 3px 12px;
+	flex: 1;
+	order: -1;
+	border-radius: 3px 3px 0 0;
+	color: #444;
+	background: rgba(0,137,167,.3);
+	transition: .5s ;
+	cursor: pointer;
+}
+section.typeA .tabLabel:nth-last-of-type(1){ margin-right: 0; }
+section.typeA input {		/* ラジオボタン非表示 */
+	display: none;
+}
+section.typeA .content {	/* 本文 */
+	width: 100%;
+	height: 0;
+	overflow: hidden;
+	opacity: 0;
+}
+/*アクティブ設定*/
+section.typeA input:checked + .tabLabel {
+	color: #fff;
+	background: rgba(0,137,167,.7);
+}
+section.typeA input:checked + .tabLabel + .content {
+	padding: 15px;
+	height: auto;
+	overflow: auto;
+	box-shadow: 0 0 5px rgba(0,0,0,.2);
+	transition: .5s opacity;
+	opacity: 1;
+}
+
+.letter_color {
+	color:white;
+}
+
+.scroll{
+	height: 85vh;
+	overflow: auto;
+  }
