@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+SQLList
+{% endblock %}
+
+{% block main %}
+  <p>データベース一覧</p>
+  {% for database in databases %}
+  <p>{{ database.name }}</p>
+  {% endfor %}
+{% endblock %}

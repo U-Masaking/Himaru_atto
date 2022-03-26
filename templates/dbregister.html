@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+SQLRegister
+{% endblock %}
+
+{% block main %}
+<div class="wrapper">
+  <div class="column leftside">
+    <!-- ホーム画面への遷移 -->
+    <a href="/" class="btn btn-primary">SQL</a>
+    <!-- データベース一覧画面への遷移 -->
+    <a href="/dblist" class="btn btn-primary button-f">データベース一覧</a>
+    <!-- データベース登録画面（本画面）への遷移（Disabled） -->
+    <button type="button" class="btn btn-secondary button-f" disabled>データベース登録</button>
+    <div class="text-center">
+    <div>
+      <p>CSVファイルからデータベースを登録</p>
+      <form action="/dbregister" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="name" class="form-label">データベース名</label>
+          <input type="text" class="form-control" name="name">
+        </div>
+        <p>テーブルファイル</p>
+        <div class="input-group mb-3">
+          <input type="file" class="form-cotrol" name="file">
+        </div>
+        <button class="btn btn-primary" type="submit">Upload</button>
+      </form>
+    </div>
+  </div>
+  </div>
+  <div class="column rightside">
+  </div>
+  </div>
+{% endblock %}

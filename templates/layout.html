@@ -9,20 +9,29 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 
     <!-- cssのリンク -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="/static/styles.css" rel="stylesheet">
 
     <!-- bootstrap -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- javascript -->
+    <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dblist.js') }}"></script>
+  
 
     <!-- タイトル -->
     <title>{% block title %}{% endblock %}</title>
+
+    <link href="https://use.fontawesome.com/releases/v6.1.1/css/all.css" rel="stylesheet">
   </head>
   <body>
     <!-- ナビゲーションバー -->
     <nav class="navbar navbar-expand-md navbar-light bg-light border">
       <!-- タイトル -->
-      <a class="navbar-brand" href="/">SQLearning</a>
+      <a class="navbar-brand"  href="/"><i class="fas fa-database fa-fw"></i>SQLearning</a>
       <!-- 引き出しボタン -->
       <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
         <span class="navbar-toggler-icon"></span>
@@ -31,20 +40,84 @@
       <div class="collapse navbar-collapse" id="navbar">
         <!-- 左側 -->
         <ul class="navbar-nav mr-auto mt-2">
-          <li class="nav-item"><a class="nav-link" href="/howtouse">使い方</a></li>
-          <li class="nav-item"><a class="nav-link" href="/sqlist">SQLコマンド一覧</a></li>
-          <li class="nav-item"><a class="nav-link" href="/question">困ったとき</a></li>
+          <li class="nav-item"><a class="nav-link" href="howtouse">使い方</a></li>
+          <li class="nav-item"><a class="nav-link" id="sqlist_button">SQLコマンド一覧</a></li>
+          <div id="sqlist" class="sqlist">
+            <div class="sqlist_content">
+              <span class="close" id="sqlist_close">✖</span>
+              <div class="h1 text-center">
+                SQLコマンド
+              </div>
+              <hr>
+              <div class="container p-4">
+                <ul>
+                  <li class="mb-4">
+                    <div class="h2">
+                      テーブルの作成
+                    </div>
+                    <div class="card">
+                      CREATE TABLE <span>[テーブル名]</span> (id <span>[属性]</span> PRIMARY KEY, <span>[カラム名]</span> <span>[属性]</span>, ..., FOREIGN KEY <span>[カラム名]</span> REFERENCE <span>[テーブル名]</span> (<span>[部署コード]</span>))
+                    </div>
+                  </li>
+                  <li class="mb-4">
+                    <div class="h2">
+                      テーブルの挿入
+                    </div>
+                    <div class="card">
+                      INSERT
+                    </div>
+                  </li>
+                  <li class="mb-4">
+                    <div class="h2">
+                      テーブルの抽出
+                    </div>
+                    <div class="card">
+                      SELECT <span>[カラム名]</span>, <span>[カラム名]</span>, ..., FROM <span>[テーブル名]</span> WHERE <span>[カラム名]</span>=? AND ... ORDER BY <span>[カラム名]</span>
+                    </div>
+                  </li>
+                  <li class="mb-4">
+                    <div class="h2">
+                      テーブルの削除
+                    </div>
+                    <div class="card">
+                      DELETE
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <li class="nav-item"><a class="nav-link" id="question_button">困ったとき</a></li>
+          <div id="question" class="question">
+            <div class="question_content">
+              <span class="close" id="question_close">✖</span>
+              <div class="h1 text-center">
+                Q&A
+              </div>
+              <hr>
+              <ul>
+                <li class="mb-4">
+                  <div class="h2">
+                    問い
+                  </div>
+                  <div class="h4">
+                    答え
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
         </ul>
         <!-- 右側 -->
         {% if session.user_id %}
           <ul class="navbar-nav ml-auto mt-2">
-            <li class="nav-item"><a class="nav-link" href="/changeprofile">登録情報変更</a></li>
-            <li class="nav-item"><a class="nav-link" href="/logout">ログアウト</a></li>
+            <li class="nav-item"><a class="nav-link" href="/changeprofile"><i class="fas fa-user fa-fw"></i>登録情報変更</a></li>
+            <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-arrow-right-from-bracket fa-fw"></i>ログアウト</a></li>
           </ul>
         {% else %}
           <ul class="navbar-nav ml-auto mt-2">
-            <li class="nav-item"><a class="nav-link" href="/register">ユーザー登録</a></li>
-            <li class="nav-item"><a class="nav-link" href="/login">ログイン</a></li>
+            <li class="nav-item"><a class="nav-link" href="/register"><i class="fas fa-user-plus fa-fw"></i>ユーザー登録</a></li>
+            <li class="nav-item"><a class="nav-link" href="/login"><i class="fas fa-unlock-keyhole fa-fw"></i>ログイン</a></li>
           </ul>
         {% endif %}
       </div>
