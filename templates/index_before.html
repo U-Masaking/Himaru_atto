@@ -9,15 +9,15 @@
 <div class="wrapper">
     <div class="column leftside">
         <form action="/index_before/{{ id }}/{{ name }}" method="POST">
-            <a href="/DBregister.html" class="btn btn-primary button">データベース登録</a>
-            <a href="/DBlist.html" class="btn btn-primary button">データベース一覧</a>
+            <a href="/DBregister.html" class="btn btn-primary button-f">データベース登録</a>
+            <a href="/DBlist.html" class="btn btn-primary button-f">データベース一覧</a>
             <p class="text-center"><font size="2">※テンプレートを用いている場合、テーブル名は cp_template としてください</font></p>
             <div class="content3">
                 <textarea name="Query" id="Query" cols="" rows="" class="column2" placeholder="ここにSQLクエリを入力してください"></textarea>
             </div>
-            <button type="submit" name="send" value="temporary" class="btn btn-primary button">一時保存</button>
-            <button type="submit" name="send" value="execute" class="btn btn-primary button">実行</button>
-            <button type="submit" name="send" value="end" class="btn btn-primary button">終了</button>
+            <button type="submit" name="send" value="temporary" class="btn btn-primary button-f">一時保存</button>
+            <button type="submit" name="send" value="execute" class="btn btn-primary button-f">実行</button>
+            <button type="submit" name="send" value="end" class="btn btn-primary button-f">終了</button>
         </form>
     </div>
     <div class="column rightside">
@@ -60,7 +60,7 @@
                                                 {% if h_col2 %}
                                                     {% if flag['value'] == True %}
                                                         <td class="table-warning">{{ sell }}</td>
-                                                        <!-- <td>{{ ns2.cnt }}, {{ h_col2_site }}, {{ flag['value'] }}</td> -->
+                                                        <!-- <td class="table-active">{{ ns2.cnt }}, {{ h_col2_site }}, {{ flag['value'] }}</td> -->
 
                                                     {% else %}
                                                         <td>{{ sell }}</td>

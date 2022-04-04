@@ -30,7 +30,7 @@
 	  width: 100%;
   }
 
-  .button {
+  .button-f {
 	  margin: 2%;
 	  margin-top: 2%;
   }
@@ -94,3 +94,7 @@ section.typeA input:checked + .tabLabel + .content {
 	height: 85vh;
 	overflow: auto;
   }
+
+.t-color{
+	color:yellow;
+}

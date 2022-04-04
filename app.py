@@ -21,7 +21,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 Session(app)
 
 
-connection = psycopg2.connect(host="localhost", database="Sample", user="postgres", password="724817tf", port=5432)
+connection = psycopg2.connect(host="localhost", database="Sample", user="postgres", password="", port=5432)
 connection.autocommit = False
 cur = connection.cursor()
 
